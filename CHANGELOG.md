@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] — 2026-05-12
+
+Polish release focused on first-impression — what your colleagues see the first time they run the CLI or browse the source.
+
+### Added
+- **`welcome` command** — 30-second intro for first-run users, with the two ways to use the package (talk to your agent · use the CLI) and a copy-pasteable example for each.
+- **`examples/` directory** — a fully-worked audit (`audit-context.yaml` + `alerts.json` + `findings.json` + the rendered `audit-report.md`) that you can `cp -r` to bootstrap a real client audit. Ships in the npm tarball.
+- **Human-friendly output by default** in `score-alert` and `score-dashboard`:
+  - ASCII box with title, score bar (colored by 5-step bucket), priority icon, recommendation.
+  - Reasons annotated with ❌ / ⚠️ / ✅ / ℹ️ glyphs.
+  - Batch mode renders a one-line-per-rule summary table plus a priority count header.
+  - `--json` flag preserves the legacy machine-readable shape for CI / jq pipelines.
+- **`scripts/lib/pretty.mjs`** — shared pretty-printer (color-aware, respects `NO_COLOR`, falls back to plain text when stdout isn't a TTY).
+- **`list` command reorganised**:
+  - Top: "🎯 What you can do" — six tasks the skill solves, in plain language.
+  - Middle: "🚦 CLI commands by phase" — Setup / Bootstrap / Score / Report / Inspect.
+  - Bottom: the full inventory of playbooks, prompts, templates, schemas, profiles, scripts.
+- **`doctor` next-steps hint** — after the OK line, the CLI suggests the three commands the user is most likely to need next.
+
+### Fixed
+- (None — this is an additive minor.)
+
+### Test suite
+- 36 → 40 tests. New coverage:
+  - score-alert default output is the pretty box (no JSON).
+  - score-dashboard default output shows Strengths / Gaps.
+  - `welcome` command prints the friendly intro with both modes.
+  - `list` includes "What you can do" and "CLI commands by phase" sections.
+- Existing JSON-shape tests updated to use `--json` explicitly.
+
 ## [1.0.0] — 2026-05-12
 
 First production release under the `@elven-observability/observability-auditor-skill` npm scope. The CLI surface, manifest, and JSON Schemas are now considered the public API.

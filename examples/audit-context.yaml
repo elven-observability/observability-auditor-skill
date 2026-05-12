@@ -1,0 +1,66 @@
+# Worked example: incident audit of "AcmeRetail / checkout" for 2026-05-10 afternoon.
+# Replace every field marked with [your-...] with your own values.
+
+client: "AcmeRetail"
+grafana_url: "https://grafana.acme.com"
+org_id: 42
+timezone: "America/Sao_Paulo"
+operation_mode: "read_only"
+
+environments: ["prod"]
+services: ["checkout", "payment"]
+business_question: "Why did checkout completion drop between 14:00 and 16:30 BRT on 2026-05-10?"
+
+bad_window:
+  start: "2026-05-10T14:00:00-03:00"
+  end:   "2026-05-10T16:30:00-03:00"
+good_window:
+  start: "2026-05-09T14:00:00-03:00"
+  end:   "2026-05-09T16:30:00-03:00"
+baseline_windows:
+  - label: "same-hour-yesterday"
+    start: "2026-05-09T14:00:00-03:00"
+    end:   "2026-05-09T16:30:00-03:00"
+  - label: "same-weekday-last-week"
+    start: "2026-05-03T14:00:00-03:00"
+    end:   "2026-05-03T16:30:00-03:00"
+
+# Canonical label keys for this org — probe via list_prometheus_label_names before trusting.
+labels:
+  client: "client"
+  environment: "environment"
+  service: "service_name"
+  host: "host_name"
+  instance: "instance"
+
+# MCP allowlist for the session (subset of the canonical safety contract).
+allowed_actions:
+  - list_datasources
+  - list_prometheus_label_names
+  - list_prometheus_label_values
+  - list_prometheus_metric_names
+  - query_prometheus
+  - query_prometheus_histogram
+  - query_loki_logs
+  - query_loki_stats
+  - query_loki_patterns
+  - find_slow_requests
+  - find_error_pattern_logs
+  - search_dashboards
+  - get_dashboard_by_uid
+  - list_alert_groups
+  - get_alert_group
+  - get_annotations
+  - generate_deeplink
+
+forbidden_actions:
+  - alerting_manage_rules
+  - alerting_manage_routing
+  - update_dashboard
+  - create_incident
+  - add_activity_to_incident
+  - shell_*
+  - sql_exec
+  - restart_*
+
+evidence_output: "./output"

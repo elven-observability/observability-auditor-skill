@@ -1,0 +1,96 @@
+{
+  "$schema": "../skill/mcp-observability-auditor/assets/schemas/findings.schema.json",
+  "audit_id": "audit-acme-checkout-2026-05-10",
+  "client": "AcmeRetail",
+  "org_id": 42,
+  "timezone": "America/Sao_Paulo",
+  "time_range": { "start": "2026-05-10T14:00:00-03:00", "end": "2026-05-10T16:30:00-03:00" },
+  "operation_mode": "read_only",
+  "leading_finding_id": "f-001",
+  "recovery_taxonomy": "dependency-relief",
+  "summary": {
+    "business_symptom": "checkout completion rate dropped 42% (from 87% to 50%) between 14:10 and 16:00 BRT",
+    "leading_finding": "Postgres connection pool exhaustion on checkout-db, aligned with traffic burst from marketing campaign",
+    "residual_risk": "Tempo coverage for checkout service is partial — trace evidence unavailable for routes /v2/cart and /v2/finalize",
+    "leading_confidence": "high",
+    "top_actions": [
+      "Raise checkout-db max_connections from 200 to 400 (owner: data-platform, validate: pg_stat_activity_count < 350)",
+      "Add multi-window burn-rate alert on Checkout availability SLO 99.5%/28d (owner: checkout-platform)",
+      "Enable Tempo↔Mimir exemplars on http_server_request_duration_seconds for service_name=checkout"
+    ]
+  },
+  "findings": [
+    {
+      "id": "f-001",
+      "title": "Checkout 5xx ratio peaked at 18%",
+      "severity": "high",
+      "confidence": "high",
+      "claim": "Server-side error ratio crossed 18% at 14:23 BRT and stayed above 5% until 15:58 BRT",
+      "impact": "~37% customer abandonment during 95 minutes; estimated R$248k revenue impact",
+      "datasource": "mimir-prod",
+      "tool_or_query": "sum(rate(http_server_request_duration_seconds_count{service_name=\"checkout\",http_response_status_code=~\"5..\"}[5m])) / clamp_min(sum(rate(http_server_request_duration_seconds_count{service_name=\"checkout\"}[5m])), 0.001)",
+      "time_range": { "start": "2026-05-10T14:00:00-03:00", "end": "2026-05-10T16:30:00-03:00" },
+      "filters": { "service_name": "checkout", "environment": "prod" },
+      "observed": "p95 ratio 0.18, baseline 0.005 (same-hour-yesterday) — delta +3500%",
+      "baseline_or_comparator": "same-hour-yesterday p95 ratio = 0.005",
+      "interpretation": "Service returned 5xx coincident with downstream DB latency surge",
+      "counter_test": "If DB p95 stayed flat the cause would be upstream caller; observed DB p95 went 12ms → 850ms at the same minute, refuting the counter",
+      "next_validation": "histogram_quantile(0.95, sum by (le, db_system_name)(rate(db_client_operation_duration_seconds_bucket{service_name=\"checkout\"}[5m])))",
+      "recommendation": "Raise checkout-db connection pool ceiling; add traffic-floor burn-rate alert",
+      "owner": "checkout-platform",
+      "tags": ["metrics", "root-cause"]
+    },
+    {
+      "id": "f-002",
+      "title": "checkout-db connection pool saturation",
+      "severity": "high",
+      "confidence": "high",
+      "claim": "active connections hit the ceiling of 200 at 14:18 BRT and remained pinned for 96 minutes",
+      "impact": "Database refused new acquires, propagated as 5xx upstream",
+      "datasource": "mimir-prod",
+      "tool_or_query": "max_over_time(pg_stat_activity_count{datname=\"checkout\",state=\"active\"}[5m])",
+      "time_range": { "start": "2026-05-10T14:15:00-03:00", "end": "2026-05-10T16:00:00-03:00" },
+      "filters": { "datname": "checkout" },
+      "observed": "200 active connections (ceiling) for 96 consecutive minutes",
+      "baseline_or_comparator": "same-hour-yesterday peak = 78 active connections",
+      "interpretation": "Pool exhausted under campaign-driven traffic burst",
+      "counter_test": "If error happened without saturation, observed would stay below ceiling — refuted by sustained ceiling pin",
+      "next_validation": "show pg_settings where name='max_connections'",
+      "recommendation": "Raise max_connections 200 → 400; add per-route concurrency limit",
+      "owner": "data-platform",
+      "tags": ["metrics", "infra"]
+    }
+  ],
+  "alerts_scored": [],
+  "dashboards_scored": [],
+  "blind_spots": [
+    "No Pyroscope coverage for checkout-svc — CPU regression invisible.",
+    "Tempo spanmetrics_calls_total returned 0 spans for /v2/finalize during the window — exemplar-driven jumps unavailable for that route."
+  ],
+  "recommendations": [
+    {
+      "id": "r-001",
+      "title": "Raise checkout-db max_connections 200 → 400 with monitoring",
+      "owner": "data-platform",
+      "expected_impact": "Eliminates connection-pool ceiling under campaign-grade traffic",
+      "validation_query": "max_over_time(pg_stat_activity_count[1h]) < 350",
+      "priority": "high"
+    },
+    {
+      "id": "r-002",
+      "title": "Add multi-window burn-rate alert on Checkout availability SLO 99.5%/28d",
+      "owner": "checkout-platform",
+      "expected_impact": "Page within 5 min of 14.4× burn instead of waiting for fixed-threshold to trip",
+      "validation_query": "ALERTS{alertname=\"CheckoutSLOFastBurn\"}",
+      "priority": "high"
+    },
+    {
+      "id": "r-003",
+      "title": "Enable Tempo↔Mimir exemplars on checkout HTTP histogram",
+      "owner": "platform-observability",
+      "expected_impact": "Click-through from p99 spike to slow trace, no manual trace_id lookup",
+      "validation_query": "exemplar dots visible in checkout overview dashboard",
+      "priority": "medium"
+    }
+  ]
+}

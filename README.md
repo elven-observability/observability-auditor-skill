@@ -72,15 +72,17 @@ Pronto. Abra seu agente e mande "audita o checkout do cliente X" — ele já car
 
 ```bash
 npm install -g @elven-observability/observability-auditor-skill
-mcp-observability-auditor --version
-mcp-observability-auditor doctor
+mcp-observability-auditor welcome     # 👋 30-second intro
+mcp-observability-auditor doctor      # ✓ check the install
 ```
 
 Ou sem instalar nada:
 
 ```bash
-npx @elven-observability/observability-auditor-skill list
+npx @elven-observability/observability-auditor-skill welcome
 ```
+
+> 💡 **Primeira vez?** O comando `welcome` resume tudo: as duas formas de usar (agente / CLI), comandos típicos, e um link para `examples/` (uma auditoria completa pronta para copiar e adaptar).
 
 ---
 

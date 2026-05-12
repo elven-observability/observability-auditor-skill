@@ -1,0 +1,54 @@
+[
+  {
+    "uid": "checkout-p95-too-tight",
+    "title": "Checkout — p95 latency high (legacy)",
+    "datasource": "mimir-prod",
+    "query": "histogram_quantile(0.95, sum by (le)(rate(http_server_request_duration_seconds_bucket{service_name=\"checkout\",environment=\"prod\"}[5m])))",
+    "threshold": 0.5,
+    "for": "0m",
+    "noDataState": "OK",
+    "labels": {
+      "severity": "critical",
+      "service_name": "checkout",
+      "environment": "prod"
+    },
+    "annotations": {
+      "summary": "checkout p95 > 500ms"
+    },
+    "baseline": {
+      "p50": 1.55,
+      "p95": 5.0,
+      "p99": 10.0
+    }
+  },
+  {
+    "uid": "checkout-5xx-symptom",
+    "title": "Checkout — 5xx ratio above 2% (symptom)",
+    "datasource": "mimir-prod",
+    "query": "sum(rate(http_server_request_duration_seconds_count{service_name=\"checkout\",environment=\"prod\",http_response_status_code=~\"5..\"}[5m])) / clamp_min(sum(rate(http_server_request_duration_seconds_count{service_name=\"checkout\",environment=\"prod\"}[5m])), 0.001)",
+    "threshold": 0.02,
+    "for": "5m",
+    "noDataState": "Alerting",
+    "labels": {
+      "severity": "critical",
+      "service_name": "checkout",
+      "environment": "prod",
+      "team": "checkout-platform",
+      "alert_type": "symptom"
+    },
+    "annotations": {
+      "summary": "Checkout 5xx ratio above 2% for 5m",
+      "description": "Sustained 5xx ratio above SLO threshold during business hours.",
+      "impact": "Customers cannot complete checkout — revenue impact.",
+      "runbook_url": "https://runbooks.example.com/checkout-5xx",
+      "dashboard_url": "https://grafana.example.com/d/checkout",
+      "validation_query": "sum(rate(...))",
+      "suggested_first_action": "Check checkout-db connection saturation"
+    },
+    "baseline": {
+      "p50": 0.001,
+      "p95": 0.005,
+      "p99": 0.015
+    }
+  }
+]

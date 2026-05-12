@@ -28,8 +28,10 @@ const FRONTMATTER_LIMIT = 1024; // agentskills.io spec.
 function usage() {
   return `MCP Observability Auditor — Elven Works observability audit skill.
 
+First time? Run:  mcp-observability-auditor welcome
+
 Usage:
-  mcp-observability-auditor [--version | --help]
+  mcp-observability-auditor [--version | --help | welcome]
   mcp-observability-auditor list [--json]
   mcp-observability-auditor playbooks [--json]
   mcp-observability-auditor prompts [--json]
@@ -174,41 +176,66 @@ function printList(manifest, json = false) {
     return;
   }
 
-  process.stdout.write("Playbooks\n");
-  for (const playbook of manifest.playbooks) {
-    process.stdout.write(`  ${playbook.id.padEnd(28)} ${playbook.description}\n`);
+  const HAS_TTY = process.stdout && process.stdout.isTTY;
+  const C = HAS_TTY && process.env.NO_COLOR === undefined;
+  const bold = C ? "\x1b[1m" : "";
+  const dim  = C ? "\x1b[2m" : "";
+  const cyan = C ? "\x1b[36m" : "";
+  const rst  = C ? "\x1b[0m" : "";
+
+  // ─── Tasks (use cases) ─────────────────────────────────────────────────────
+  process.stdout.write(`${bold}🎯  What you can do${rst}\n`);
+  process.stdout.write(`  ${cyan}Org-wide audit${rst}          ${dim}—${rst} inventory, label drift, blind spots, top alerts/dashboards\n`);
+  process.stdout.write(`  ${cyan}App deep-dive${rst}           ${dim}—${rst} one service: traffic → errors → latency → deps → biz\n`);
+  process.stdout.write(`  ${cyan}Incident timeline${rst}       ${dim}—${rst} bad vs good window, recovery taxonomy\n`);
+  process.stdout.write(`  ${cyan}Alert threshold audit${rst}   ${dim}—${rst} score 0–5 vs real baseline (p50/p95/p99)\n`);
+  process.stdout.write(`  ${cyan}Dashboard audit${rst}         ${dim}—${rst} usefulness during incidents, query hygiene\n`);
+  process.stdout.write(`  ${cyan}SLO design${rst}              ${dim}—${rst} multi-burn-rate, traffic-floor, error-budget policy\n`);
+
+  // ─── Workflow commands grouped by phase ───────────────────────────────────
+  process.stdout.write(`\n${bold}🚦  CLI commands by phase${rst}\n`);
+  process.stdout.write(`  ${dim}1. Setup${rst}    ${cyan}welcome  doctor  install-skill  list${rst}\n`);
+  process.stdout.write(`  ${dim}2. Bootstrap${rst} ${cyan}export-templates  validate-context  window${rst}\n`);
+  process.stdout.write(`  ${dim}3. Score${rst}    ${cyan}score-alert  score-dashboard${rst}  ${dim}(human-friendly by default; --json for CI)${rst}\n`);
+  process.stdout.write(`  ${dim}4. Report${rst}   ${cyan}render-report  redact${rst}\n`);
+  process.stdout.write(`  ${dim}5. Inspect${rst}  ${cyan}show <id>  prompt <id>${rst}  ${dim}(see the playbooks/prompts the agent loads)${rst}\n`);
+
+  // ─── Inventory below the fold ─────────────────────────────────────────────
+  process.stdout.write(`\n${bold}📚  Playbooks${rst}  ${dim}(load via 'show playbook:<id>')${rst}\n`);
+  for (const p of manifest.playbooks) {
+    process.stdout.write(`  ${p.id.padEnd(28)} ${dim}${p.description}${rst}\n`);
   }
 
-  process.stdout.write("\nPrompts\n");
-  for (const prompt of manifest.prompts) {
-    process.stdout.write(`  ${prompt.id}\n`);
-  }
+  process.stdout.write(`\n${bold}💬  Prompts${rst}  ${dim}(render with 'prompt <id> --client X ...')${rst}\n`);
+  for (const pr of manifest.prompts) process.stdout.write(`  ${pr.id}\n`);
 
-  process.stdout.write("\nTemplates\n");
-  for (const template of manifest.templates) {
-    process.stdout.write(`  ${template.id.padEnd(20)} ${template.title}\n`);
+  process.stdout.write(`\n${bold}📋  Templates${rst}  ${dim}(copy with 'export-templates')${rst}\n`);
+  for (const t of manifest.templates) {
+    process.stdout.write(`  ${t.id.padEnd(20)} ${dim}${t.title}${rst}\n`);
   }
 
   if (Array.isArray(manifest.schemas) && manifest.schemas.length > 0) {
-    process.stdout.write("\nSchemas\n");
-    for (const schema of manifest.schemas) {
-      process.stdout.write(`  ${schema.id.padEnd(28)} ${schema.title}\n`);
+    process.stdout.write(`\n${bold}🧾  JSON Schemas${rst}  ${dim}(used by validate-context and the test suite)${rst}\n`);
+    for (const s of manifest.schemas) {
+      process.stdout.write(`  ${s.id.padEnd(28)} ${dim}${s.title}${rst}\n`);
     }
   }
 
   if (Array.isArray(manifest.profiles) && manifest.profiles.length > 0) {
-    process.stdout.write("\nProfiles\n");
-    for (const profile of manifest.profiles) {
-      process.stdout.write(`  ${profile.id.padEnd(20)} ${profile.title}\n`);
+    process.stdout.write(`\n${bold}🪪  Profiles${rst}  ${dim}(opinionated defaults you can import into your context)${rst}\n`);
+    for (const pf of manifest.profiles) {
+      process.stdout.write(`  ${pf.id.padEnd(20)} ${dim}${pf.title}${rst}\n`);
     }
   }
 
   if (Array.isArray(manifest.scripts) && manifest.scripts.length > 0) {
-    process.stdout.write("\nScripts\n");
-    for (const script of manifest.scripts) {
-      process.stdout.write(`  ${script.id.padEnd(20)} ${script.description}\n`);
+    process.stdout.write(`\n${bold}🛠   Scripts${rst}  ${dim}(deterministic helpers — zero deps)${rst}\n`);
+    for (const sc of manifest.scripts) {
+      process.stdout.write(`  ${sc.id.padEnd(20)} ${dim}${sc.description}${rst}\n`);
     }
   }
+
+  process.stdout.write(`\n${dim}Tip: 'mcp-observability-auditor welcome' for the 30-second intro.${rst}\n`);
 }
 
 function printSimple(items, json) {
@@ -470,11 +497,23 @@ function commandDoctor(manifest, args) {
     process.exit(2);
   }
 
+  const HAS_TTY = process.stdout && process.stdout.isTTY;
+  const C = HAS_TTY && process.env.NO_COLOR === undefined;
+  const dim  = C ? "\x1b[2m" : "";
+  const grn  = C ? "\x1b[32m" : "";
+  const cyan = C ? "\x1b[36m" : "";
+  const rst  = C ? "\x1b[0m" : "";
+
   process.stdout.write(
-    `Doctor OK: ${skillName} v${readPackageVersion()} — ${manifest.playbooks.length} playbooks, ` +
+    `${grn}✓ Doctor OK${rst}: ${skillName} v${readPackageVersion()} — ${manifest.playbooks.length} playbooks, ` +
     `${manifest.prompts.length} prompts, ${manifest.templates.length} templates, ` +
     `${(manifest.schemas || []).length} schemas, ${(manifest.profiles || []).length} profiles, ` +
-    `${(manifest.scripts || []).length} scripts.\n`
+    `${(manifest.scripts || []).length} scripts.\n` +
+    `\n${dim}Next:${rst}\n` +
+    `  ${cyan}mcp-observability-auditor welcome${rst}              ${dim}# 30-second intro${rst}\n` +
+    `  ${cyan}mcp-observability-auditor list${rst}                 ${dim}# see what's inside${rst}\n` +
+    `  ${cyan}mcp-observability-auditor install-skill --dest ~/.claude/skills${rst}\n` +
+    `                                                  ${dim}# enable the agent skill${rst}\n`
   );
 }
 
@@ -489,11 +528,64 @@ function runScript(scriptId, args) {
   process.exit(result.status ?? 1);
 }
 
+function commandWelcome() {
+  const HAS_TTY = process.stdout && process.stdout.isTTY;
+  const NO_COLOR = process.env.NO_COLOR !== undefined || process.env.TERM === "dumb";
+  const C = (HAS_TTY && !NO_COLOR);
+  const bold = C ? "\x1b[1m" : "";
+  const dim  = C ? "\x1b[2m" : "";
+  const cyan = C ? "\x1b[36m" : "";
+  const grn  = C ? "\x1b[32m" : "";
+  const rst  = C ? "\x1b[0m" : "";
+
+  const v = readPackageVersion();
+  const lines = [
+    "",
+    `${bold}🛰  Observability Auditor Skill${rst} ${dim}v${v}${rst}`,
+    "",
+    `${grn}You're set.${rst} Two ways to use this — pick one:`,
+    "",
+    `${bold}1) 🤖  Talk to your agent (recommended)${rst}`,
+    `   This package is also an Agent Skill for Claude Code / Codex / any MCP-aware agent.`,
+    `   Install it once:`,
+    `     ${cyan}mcp-observability-auditor install-skill --dest ~/.claude/skills${rst}`,
+    `   (For Codex/Agent SDK use ${cyan}~/.agents/skills${rst} instead.)`,
+    ``,
+    `   Then in your agent just ask, in your own words, things like:`,
+    `     ${dim}"audita os alertas do org 42 e me fala quais flapam"${rst}`,
+    `     ${dim}"o que quebrou no checkout entre 14h e 16h ontem? read-only"${rst}`,
+    `     ${dim}"recomenda SLOs para os 3 serviços críticos desse cliente"${rst}`,
+    ``,
+    `${bold}2) 🛠  Use the CLI directly${rst}`,
+    `   Useful for batch jobs, CI, or when you want to score 50 alerts without burning tokens.`,
+    ``,
+    `   ${cyan}mcp-observability-auditor doctor${rst}              ${dim}# check the install${rst}`,
+    `   ${cyan}mcp-observability-auditor list${rst}                ${dim}# see what's inside${rst}`,
+    `   ${cyan}mcp-observability-auditor export-templates --dest ./my-audit${rst}`,
+    `                                                  ${dim}# bootstrap an audit workspace${rst}`,
+    `   ${cyan}mcp-observability-auditor score-alert --alert ./rule.json${rst}`,
+    `                                                  ${dim}# score one rule with a 0–5 rubric${rst}`,
+    `   ${cyan}mcp-observability-auditor render-report --findings ./findings.json \\${rst}`,
+    `       ${cyan}--context ./audit-context.yaml --out ./report.md${rst}`,
+    `                                                  ${dim}# build the client-facing markdown${rst}`,
+    ``,
+    `${bold}Need a worked example?${rst} See ${cyan}examples/${rst} inside the package for a fully-filled audit.`,
+    `${bold}Want to see the skill content?${rst} Try ${cyan}mcp-observability-auditor show playbook:alert-threshold-audit${rst}.`,
+    `${bold}Docs and source:${rst} https://github.com/elven-observability/observability-auditor-skill`,
+    ""
+  ];
+  process.stdout.write(lines.join("\n"));
+}
+
 function main() {
   const [command = "help", ...args] = process.argv.slice(2);
 
   if (command === "help" || command === "--help" || command === "-h") {
     process.stdout.write(usage());
+    return;
+  }
+  if (command === "welcome" || command === "hi" || command === "hello") {
+    commandWelcome();
     return;
   }
   if (command === "--version" || command === "-v") {

@@ -183,7 +183,7 @@ test("validate-context: schema catches invalid grafana_url (no http(s) scheme)",
   fs.unlinkSync(bad);
 });
 
-test("score-alert flags a poorly configured rule and recommends rewrite/delete", () => {
+test("score-alert flags a poorly configured rule (--json opt-in)", () => {
   const rule = {
     uid: "a1",
     title: "Checkout 5xx",
@@ -196,7 +196,7 @@ test("score-alert flags a poorly configured rule and recommends rewrite/delete",
     annotations: { summary: "Checkout 5xx high" },
     baseline: { p50: 0.001, p95: 0.01, p99: 0.03 }
   };
-  const result = run(["score-alert", "--inline", JSON.stringify(rule)]);
+  const result = run(["score-alert", "--inline", JSON.stringify(rule), "--json"]);
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const scored = JSON.parse(result.stdout);
   assert.ok(scored.score <= 2, `expected low score, got ${scored.score}`);
@@ -204,6 +204,58 @@ test("score-alert flags a poorly configured rule and recommends rewrite/delete",
   assert.ok(scored.reasons.some((r) => /above baseline p99/.test(r)));
   assert.match(scored.recommendation, /delete or replace|rewrite/);
   assert.ok(["critical", "high"].includes(scored.priority), `expected critical|high priority, got ${scored.priority}`);
+});
+
+test("score-alert default output is human-friendly (no JSON)", () => {
+  const rule = {
+    uid: "a1", title: "Checkout 5xx", threshold: 0.05, for: "0m", noDataState: "OK",
+    labels: { severity: "critical", service_name: "checkout", environment: "prod" },
+    annotations: { summary: "x" },
+    baseline: { p50: 0.001, p95: 0.01, p99: 0.03 }
+  };
+  // spawnSync inherits a non-tty stdout, so the pretty renderer skips ANSI.
+  const result = run(["score-alert", "--inline", JSON.stringify(rule)]);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /Score: .* \/ 5/);
+  assert.match(result.stdout, /Priority:/);
+  // Reasons surface as bullets with ❌/⚠️/ℹ️ markers (not raw JSON).
+  assert.doesNotMatch(result.stdout, /^\{[\s\S]*"score":/);
+});
+
+test("score-dashboard default output is human-friendly", () => {
+  const dashboard = {
+    uid: "d1",
+    title: "Checkout overview",
+    variables: [{ name: "service", current: "All" }],
+    links: [],
+    panels: [{ title: "Total requests", isCounter: true, query: "http_requests_total" }]
+  };
+  const result = run(["score-dashboard", "--inline", JSON.stringify(dashboard)]);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /Score:/);
+  assert.match(result.stdout, /Strengths:/);
+  assert.match(result.stdout, /Gaps:/);
+});
+
+test("welcome command prints the friendly intro", () => {
+  const result = run(["welcome"]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Observability Auditor Skill/);
+  assert.match(result.stdout, /Talk to your agent|Use the CLI/);
+  assert.match(result.stdout, /install-skill/);
+});
+
+test("list groups commands by phase + lists every manifest section", () => {
+  const result = run(["list"]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /What you can do/);
+  assert.match(result.stdout, /CLI commands by phase/);
+  assert.match(result.stdout, /Playbooks/);
+  assert.match(result.stdout, /Prompts/);
+  assert.match(result.stdout, /Templates/);
+  assert.match(result.stdout, /Schemas/);
+  assert.match(result.stdout, /Profiles/);
+  assert.match(result.stdout, /Scripts/);
 });
 
 test("score-alert: well-tuned rule earns ≥4 and 'info' or 'low' priority", () => {
@@ -233,14 +285,14 @@ test("score-alert: well-tuned rule earns ≥4 and 'info' or 'low' priority", () 
     },
     baseline: { p50: 0.001, p95: 0.01, p99: 0.02 }
   };
-  const result = run(["score-alert", "--inline", JSON.stringify(rule)]);
+  const result = run(["score-alert", "--inline", JSON.stringify(rule), "--json"]);
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const scored = JSON.parse(result.stdout);
   assert.ok(scored.score >= 4, `expected good score ≥4, got ${scored.score}`);
   assert.ok(["info", "low"].includes(scored.priority), `expected info|low priority, got ${scored.priority}`);
 });
 
-test("score-dashboard penalises 'All' defaults, missing links, and counter-on-gauge", () => {
+test("score-dashboard --json penalises 'All' defaults, missing links, counter-on-gauge", () => {
   const dashboard = {
     uid: "d1",
     title: "Checkout overview",
@@ -253,7 +305,7 @@ test("score-dashboard penalises 'All' defaults, missing links, and counter-on-ga
       { title: "Total requests", isCounter: true, query: "http_requests_total" }
     ]
   };
-  const result = run(["score-dashboard", "--inline", JSON.stringify(dashboard)]);
+  const result = run(["score-dashboard", "--inline", JSON.stringify(dashboard), "--json"]);
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const scored = JSON.parse(result.stdout);
   assert.ok(scored.score <= 4, `expected reduced score, got ${scored.score}`);

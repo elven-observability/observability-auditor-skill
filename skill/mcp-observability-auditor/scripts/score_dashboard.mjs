@@ -8,6 +8,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { renderScoredDashboard, renderBatchSummary } from "./lib/pretty.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 
@@ -19,9 +20,11 @@ Usage:
   node scripts/score_dashboard.mjs --batch -          # read JSON array from stdin
   node scripts/score_dashboard.mjs --inline '<json>'
 
-Output: { uid, title, score (0-5), reasons[], strengths[], gaps[], recommendation, priority }.
+By default the output is a human-friendly summary (score bar, priority icon,
+strengths/gaps). Pass --json for machine-readable JSON (CI, jq, etc.).
 
 Flags:
+  --json     Emit JSON instead of the human-friendly summary.
   --version  Print version and exit.
 
 Exit codes:
@@ -217,7 +220,18 @@ async function main() {
   const input = await readJsonInput(args);
   const list = Array.isArray(input) ? input : [input];
   const scored = list.map(evaluateOne);
-  process.stdout.write(JSON.stringify(scored.length === 1 ? scored[0] : scored, null, 2) + "\n");
+
+  if (args.json) {
+    process.stdout.write(JSON.stringify(scored.length === 1 ? scored[0] : scored, null, 2) + "\n");
+    return;
+  }
+
+  if (scored.length === 1) {
+    process.stdout.write(renderScoredDashboard(scored[0]));
+  } else {
+    process.stdout.write(renderBatchSummary(scored, "dashboard") + "\n");
+    process.stdout.write("Run with --json for the full evidence per dashboard.\n");
+  }
 }
 
 main().catch((err) => die(String(err && err.stack || err), 2));
