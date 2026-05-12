@@ -1,0 +1,16 @@
+# package.json `files` field is the canonical whitelist. This .npmignore is a
+# safety net for files that should never ship even if `files` widens later.
+
+.git/
+.github/
+node_modules/
+.vscode/
+.idea/
+.DS_Store
+*.log
+*.tmp
+*.swp
+tests/
+coverage/
+.nyc_output/
+*.tgz

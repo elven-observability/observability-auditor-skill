@@ -1,0 +1,88 @@
+# Audit Context — fill before the first MCP call.
+# scripts/validate_context.mjs will fail-fast if any of the * fields are empty.
+
+# * = required
+client: ""                  # * customer/tenant identifier
+grafana_url: ""             # * full Grafana URL (include /a/?orgId=N if multi-org)
+org_id: ""                  # * Grafana org id
+timezone: "UTC"             # * IANA timezone for all human-readable timestamps
+operation_mode: "read_only" # * read_only | write_requested | restricted
+
+environments: []            # e.g. [prod, staging, eu-prod]
+services: []                # canonical service_name values
+business_question: ""       # the actual question the user is asking
+
+# Windows are absolute. Use ISO 8601 with offset (e.g. 2026-05-11T14:00:00-03:00).
+# scripts/window_math.mjs can normalise these and produce baselines for you.
+bad_window:
+  start: ""
+  end: ""
+good_window:
+  start: ""
+  end: ""
+baseline_windows:
+  - label: "same-hour-yesterday"
+    start: ""
+    end: ""
+  - label: "same-weekday-last-week"
+    start: ""
+    end: ""
+
+# Canonical label names this org uses. Probe before populating.
+labels:
+  client: "client"
+  environment: "environment"
+  service: "service_name"
+  host: "host_name"
+  instance: "instance"
+  tenant: ""
+  cluster: ""
+  region: ""
+
+# Whitelist of tools the auditor is allowed to call this session.
+allowed_actions:
+  - list_datasources
+  - get_datasource
+  - list_prometheus_metric_names
+  - list_prometheus_metric_metadata
+  - list_prometheus_label_names
+  - list_prometheus_label_values
+  - query_prometheus
+  - query_prometheus_histogram
+  - list_loki_label_names
+  - list_loki_label_values
+  - query_loki_logs
+  - query_loki_stats
+  - query_loki_patterns
+  - list_pyroscope_profile_types
+  - query_pyroscope
+  - search_folders
+  - search_dashboards
+  - get_dashboard_by_uid
+  - get_dashboard_summary
+  - get_dashboard_panel_queries
+  - list_alert_groups
+  - get_alert_group
+  - list_incidents
+  - get_incident
+  - list_sift_investigations
+  - get_sift_investigation
+  - get_sift_analysis
+  - find_error_pattern_logs
+  - find_slow_requests
+  - get_annotations
+  - get_panel_image
+  - generate_deeplink
+
+forbidden_actions:
+  - restart_*
+  - alerting_manage_rules
+  - alerting_manage_routing
+  - update_dashboard
+  - create_incident
+  - add_activity_to_incident
+  - update_annotation
+  - shell_or_sql_on_host
+  - expose_secrets
+
+evidence_output: "./observability-audit"   # where findings.json / report markdown go

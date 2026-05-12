@@ -1,0 +1,58 @@
+{
+  "$schema": "../schemas/findings.schema.json",
+  "audit_id": "",
+  "client": "",
+  "org_id": "",
+  "timezone": "UTC",
+  "time_range": {
+    "start": "",
+    "end": ""
+  },
+  "operation_mode": "read_only",
+  "context_ref": "./audit-context.yaml",
+  "leading_finding_id": "",
+  "recovery_taxonomy": "",
+  "summary": {
+    "business_symptom": "",
+    "leading_finding": "",
+    "residual_risk": "",
+    "leading_confidence": "medium",
+    "top_actions": []
+  },
+  "findings": [
+    {
+      "id": "f-001",
+      "title": "",
+      "severity": "medium",
+      "confidence": "medium",
+      "claim": "",
+      "impact": "",
+      "datasource": "",
+      "tool_or_query": "",
+      "time_range": { "start": "", "end": "" },
+      "filters": {},
+      "observed": "",
+      "baseline_or_comparator": "",
+      "interpretation": "",
+      "counter_test": "",
+      "next_validation": "",
+      "recommendation": "",
+      "owner": "",
+      "deeplinks": [],
+      "tags": []
+    }
+  ],
+  "alerts_scored": [],
+  "dashboards_scored": [],
+  "blind_spots": [],
+  "recommendations": [
+    {
+      "id": "r-001",
+      "title": "",
+      "owner": "",
+      "expected_impact": "",
+      "validation_query": "",
+      "priority": "medium"
+    }
+  ]
+}

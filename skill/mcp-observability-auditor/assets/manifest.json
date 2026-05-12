@@ -1,0 +1,189 @@
+{
+  "name": "mcp-observability-auditor",
+  "version": "1.0.0",
+  "playbooks": [
+    {
+      "id": "preflight-readonly",
+      "title": "Preflight Read-only",
+      "file": "references/preflight-readonly.md",
+      "description": "Safety, evidence, timezone, and regulated-environment gates."
+    },
+    {
+      "id": "mcp-safety",
+      "title": "MCP Safety Contract",
+      "file": "references/mcp-safety.md",
+      "description": "Canonical MCP allowlist, hard-block list, and write authorisation protocol."
+    },
+    {
+      "id": "redaction-patterns",
+      "title": "Redaction Patterns",
+      "file": "references/redaction-patterns.md",
+      "description": "Catalog of secret/token/PII redaction regexes with replacement strings."
+    },
+    {
+      "id": "org-discovery",
+      "title": "Organization Discovery",
+      "file": "references/org-discovery.md",
+      "description": "Inventory datasources, labels, services, dashboards, alerts, and telemetry coverage."
+    },
+    {
+      "id": "app-deep-dive",
+      "title": "Application Deep Dive",
+      "file": "references/app-deep-dive.md",
+      "description": "Analyze one service through metrics, logs, traces, infra, dependencies, and business counters."
+    },
+    {
+      "id": "incident-timeline",
+      "title": "Incident Timeline",
+      "file": "references/incident-timeline.md",
+      "description": "Compare bad vs good windows and identify what changed."
+    },
+    {
+      "id": "alert-threshold-audit",
+      "title": "Alert Threshold Audit",
+      "file": "references/alert-threshold-audit.md",
+      "description": "Audit alert rules, thresholds, labels, runbooks, and operational fit."
+    },
+    {
+      "id": "dashboard-audit",
+      "title": "Dashboard Audit",
+      "file": "references/dashboard-audit.md",
+      "description": "Assess dashboards for incident usefulness, label consistency, and query quality."
+    },
+    {
+      "id": "slo-best-practices-2026",
+      "title": "SLO And Alerting Practices 2026",
+      "file": "references/slo-best-practices-2026.md",
+      "description": "Modern SLO, multi-burn-rate, error-budget policy, OTel semconv, exemplars, Adaptive Metrics."
+    },
+    {
+      "id": "query-library",
+      "title": "Query Library",
+      "file": "references/query-library.md",
+      "description": "PromQL, LogQL, TraceQL, ClickHouse-OTel, Elasticsearch, Pyroscope patterns with OTel-stable names and exemplars."
+    },
+    {
+      "id": "mcp-tool-catalog",
+      "title": "MCP Tool Catalog",
+      "file": "references/mcp-tool-catalog.md",
+      "description": "Canonical Grafana MCP tools with the question each one answers."
+    },
+    {
+      "id": "anti-patterns",
+      "title": "Anti-patterns and Theatre Detection",
+      "file": "references/anti-patterns.md",
+      "description": "Honest list of patterns to refuse and how to deliver the honest replacement."
+    },
+    {
+      "id": "report-template",
+      "title": "Report Template",
+      "file": "references/report-template.md",
+      "description": "Executive and technical report structure with language rules."
+    }
+  ],
+  "prompts": [
+    { "id": "master", "file": "references/prompt-library.md", "heading": "master" },
+    { "id": "org-audit", "file": "references/prompt-library.md", "heading": "org-audit" },
+    { "id": "app-deep-dive", "file": "references/prompt-library.md", "heading": "app-deep-dive" },
+    { "id": "incident-timeline", "file": "references/prompt-library.md", "heading": "incident-timeline" },
+    { "id": "alert-threshold-audit", "file": "references/prompt-library.md", "heading": "alert-threshold-audit" },
+    { "id": "dashboard-audit", "file": "references/prompt-library.md", "heading": "dashboard-audit" },
+    { "id": "executive-report", "file": "references/prompt-library.md", "heading": "executive-report" }
+  ],
+  "templates": [
+    {
+      "id": "audit-context",
+      "title": "Audit Context YAML",
+      "file": "assets/templates/audit-context.yaml"
+    },
+    {
+      "id": "audit-report",
+      "title": "Audit Report Markdown",
+      "file": "assets/templates/audit-report.md"
+    },
+    {
+      "id": "findings-json",
+      "title": "Findings JSON",
+      "file": "assets/templates/findings.json"
+    },
+    {
+      "id": "evidence-ledger",
+      "title": "Evidence Ledger YAML",
+      "file": "assets/templates/evidence-ledger.yaml"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "elven",
+      "title": "Elven Works (LGTM SaaS) Profile",
+      "file": "assets/profiles/elven.yaml",
+      "description": "Canonical defaults for Elven Observability SaaS — label model, datasource names, allowlist, common trigger phrases."
+    }
+  ],
+  "schemas": [
+    {
+      "id": "audit-context-schema",
+      "title": "Audit Context JSON Schema",
+      "file": "assets/schemas/audit-context.schema.json"
+    },
+    {
+      "id": "findings-schema",
+      "title": "Findings JSON Schema",
+      "file": "assets/schemas/findings.schema.json"
+    },
+    {
+      "id": "scored-alert-schema",
+      "title": "Scored Alert JSON Schema",
+      "file": "assets/schemas/scored-alert.schema.json"
+    },
+    {
+      "id": "scored-dashboard-schema",
+      "title": "Scored Dashboard JSON Schema",
+      "file": "assets/schemas/scored-dashboard.schema.json"
+    }
+  ],
+  "scripts": [
+    {
+      "id": "window-math",
+      "title": "Window Math",
+      "file": "scripts/window_math.mjs",
+      "description": "Normalise a window and produce baseline comparators + slice grid."
+    },
+    {
+      "id": "render-prompt",
+      "title": "Render Prompt",
+      "file": "scripts/render_prompt.mjs",
+      "description": "Substitute placeholders into any prompt from the library."
+    },
+    {
+      "id": "validate-context",
+      "title": "Validate Audit Context",
+      "file": "scripts/validate_context.mjs",
+      "description": "Schema + lint check that audit-context.yaml has required fields and well-formed windows."
+    },
+    {
+      "id": "score-alert",
+      "title": "Score Alert",
+      "file": "scripts/score_alert.mjs",
+      "description": "Apply the alert-threshold-audit rubric to one or many alert rule JSON payloads."
+    },
+    {
+      "id": "score-dashboard",
+      "title": "Score Dashboard",
+      "file": "scripts/score_dashboard.mjs",
+      "description": "Apply the dashboard-audit rubric to one or many dashboard JSON payloads."
+    },
+    {
+      "id": "render-report",
+      "title": "Render Report",
+      "file": "scripts/render_report.mjs",
+      "description": "Render audit-report.md from findings.json plus audit-context.yaml."
+    },
+    {
+      "id": "redaction",
+      "title": "Redaction",
+      "file": "scripts/redaction.mjs",
+      "description": "Apply the secret/PII redaction catalog to text from stdin or a file (with optional --hash for distinct-counts)."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elven-observability.github.io/observability-auditor-skill/schemas/scored-alert.schema.json",
+  "title": "Scored Alert Rule",
+  "description": "Output shape of scripts/score_alert.mjs for one rule.",
+  "type": "object",
+  "required": ["title", "score", "priority", "recommendation", "reasons"],
+  "additionalProperties": false,
+  "properties": {
+    "uid": { "type": ["string", "null"] },
+    "title": { "type": "string", "minLength": 1 },
+    "score": { "type": "number", "minimum": 0, "maximum": 5, "multipleOf": 0.25 },
+    "priority": { "type": "string", "enum": ["critical", "high", "medium", "low", "info"] },
+    "recommendation": { "type": "string" },
+    "reasons": { "type": "array", "items": { "type": "string" } }
+  }
+}

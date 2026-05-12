@@ -1,0 +1,36 @@
+# Evidence Ledger — keep this file open during the investigation.
+# One entry per finding. Update as evidence accumulates.
+
+audit_id: ""
+client: ""
+org_id: ""
+timezone: "UTC"
+started_at: ""
+
+# Canonical label model (probed, not assumed).
+labels:
+  client: ""
+  environment: ""
+  service: ""
+  host: ""
+  instance: ""
+  tenant: ""
+
+# Tools called so far, with cost notes (helps audit reproducibility).
+tool_calls: []
+# - { tool: "list_datasources", args: {}, returned: 4, at: "" }
+
+findings: []
+# - id: f-001
+#   claim: ""
+#   confidence: medium       # high | medium | low
+#   datasource: ""
+#   tool_or_query: ""
+#   time_range: { start: "", end: "", tz: "" }
+#   filters: {}
+#   observed: ""
+#   baseline_or_comparator: ""
+#   why_it_matters: ""
+#   counterpoint: ""
+#   next_validation: ""
+#   status: open             # open | resolved | dropped

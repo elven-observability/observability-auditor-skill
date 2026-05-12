@@ -1,0 +1,126 @@
+# Elven Works profile — canonical defaults for Elven Observability SaaS (LGTM stack).
+# Optional: import the keys you want into your own audit-context.yaml. The skill
+# stays generic; this profile is just a curated starting point for Elven engineers.
+#
+# Usage:
+#   1. Copy values from here into your audit-context.yaml.
+#   2. Validate with:
+#        mcp-observability-auditor validate-context --context audit-context.yaml --strict
+#   3. The skill itself does not auto-load profiles — keeping the agent context
+#      lean is more important than the convenience of an implicit profile.
+
+profile: "elven"
+profile_version: "1.0.0"
+profile_description: |
+  Canonical defaults for Elven Works LGTM SaaS (Loki, Grafana, Tempo, Mimir).
+  Use these as the *starting* assumption; always probe with list_*_label_names
+  before trusting any label name in a real org.
+
+# Canonical label model
+labels:
+  client: "client"               # Elven multi-tenant identifier
+  environment: "environment"     # prod, staging, hml, dev, eu-prod, etc.
+  service: "service_name"        # OTel-flattened service.name
+  service_namespace: "service_namespace"
+  host: "host_name"              # Elven self-hosted nodes & Beyla collectors
+  instance: "instance"
+  cluster: "cluster"             # k8s.cluster.name flattened
+  region: "region"
+  tenant: "client"               # alias of client in Elven nomenclature
+  alert_type: "alert_type"       # symptom | cause | telemetry | business
+  severity: "severity"           # critical | warning | info
+  team: "team"
+
+# Datasource naming conventions in Elven Grafana orgs
+datasources:
+  metrics_primary: "mimir-prod"      # or whatever the customer's main Mimir is
+  metrics_secondary: "prometheus"
+  logs_primary: "loki-prod"
+  traces_primary: "tempo-prod"
+  profiles_primary: "pyroscope-prod"
+  clickhouse_logs: "otel-clickhouse"
+  synthetic: "synthetic-monitoring"
+
+# Default windows for ad-hoc audits when the user did not specify one
+defaults:
+  timezone: "America/Sao_Paulo"
+  baseline_windows:
+    - "same-hour-yesterday"
+    - "same-weekday-last-week"
+  discovery_metric_regex: "http_|rpc_|business_|node_|process_|jvm_|beyla_|otelcol_"
+
+# MCP allowlist for read_only audits against Elven Grafana — superset of the
+# canonical safety contract; copy into audit-context.yaml as needed.
+allowed_actions:
+  - list_datasources
+  - get_datasource
+  - list_prometheus_metric_names
+  - list_prometheus_metric_metadata
+  - list_prometheus_label_names
+  - list_prometheus_label_values
+  - list_loki_label_names
+  - list_loki_label_values
+  - list_pyroscope_profile_types
+  - list_pyroscope_label_names
+  - list_pyroscope_label_values
+  - query_prometheus
+  - query_prometheus_histogram
+  - query_loki_logs
+  - query_loki_stats
+  - query_loki_patterns
+  - query_pyroscope
+  - search_folders
+  - search_dashboards
+  - get_dashboard_by_uid
+  - get_dashboard_summary
+  - get_dashboard_panel_queries
+  - get_panel_image
+  - list_alert_groups
+  - get_alert_group
+  - list_incidents
+  - get_incident
+  - list_sift_investigations
+  - get_sift_investigation
+  - get_sift_analysis
+  - find_error_pattern_logs
+  - find_slow_requests
+  - get_annotations
+  - get_assertions
+  - list_oncall_schedules
+  - list_oncall_teams
+  - list_oncall_users
+  - get_current_oncall_users
+  - generate_deeplink
+
+forbidden_actions:
+  - alerting_manage_rules
+  - alerting_manage_routing
+  - update_dashboard
+  - create_annotation
+  - update_annotation
+  - create_incident
+  - add_activity_to_incident
+  - shell_*
+  - kubectl_*
+  - sql_exec
+  - restart_*
+
+# Standard report destination Elven engineers use
+evidence_output: "./observability-audit"
+
+# Trigger phrases (PT-BR + EN) Elven engineers commonly use — listed here for
+# discoverability; the skill matches them via its description, not this profile.
+known_trigger_phrases_pt:
+  - "o que quebrou ontem"
+  - "audita os alertas do cliente X"
+  - "review nesses dashboards"
+  - "compara essa manhã com a de terça"
+  - "incidente do checkout"
+  - "SLO para o serviço Y"
+known_trigger_phrases_en:
+  - "what broke yesterday"
+  - "audit alerts for client X"
+  - "review these dashboards"
+  - "compare this morning to last Tuesday"
+  - "checkout incident report"
+  - "SLO for service Y"

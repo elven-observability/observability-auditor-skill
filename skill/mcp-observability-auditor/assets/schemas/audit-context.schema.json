@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elven-observability.github.io/observability-auditor-skill/schemas/audit-context.schema.json",
+  "title": "Observability Audit Context",
+  "description": "Frame for every audit run. Fail-fast input to validate_context.mjs.",
+  "type": "object",
+  "required": ["client", "grafana_url", "org_id", "timezone", "operation_mode"],
+  "additionalProperties": true,
+  "properties": {
+    "client": { "type": "string", "minLength": 1, "description": "Customer / tenant identifier." },
+    "grafana_url": { "type": "string", "format": "uri", "pattern": "^https?://", "description": "Full Grafana URL, include /a/?orgId=N if multi-org." },
+    "org_id": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "integer", "minimum": 0 }
+      ],
+      "description": "Numeric Grafana org id (string or number)."
+    },
+    "timezone": { "type": "string", "minLength": 1, "description": "IANA timezone, e.g. America/Sao_Paulo, UTC." },
+    "operation_mode": {
+      "type": "string",
+      "enum": ["read_only", "write_requested", "restricted"],
+      "default": "read_only"
+    },
+    "environments": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "services": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "business_question": { "type": "string" },
+    "bad_window": { "$ref": "#/$defs/window" },
+    "good_window": { "$ref": "#/$defs/window" },
+    "baseline_windows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "start", "end"],
+        "properties": {
+          "label": { "type": "string", "minLength": 1 },
+          "start": { "type": "string", "format": "date-time" },
+          "end": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "description": "Canonical label keys used by this org. Probe before populating.",
+      "properties": {
+        "client": { "type": "string" },
+        "environment": { "type": "string" },
+        "service": { "type": "string" },
+        "host": { "type": "string" },
+        "instance": { "type": "string" },
+        "tenant": { "type": "string" },
+        "cluster": { "type": "string" },
+        "region": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "allowed_actions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Whitelist of MCP tools the auditor may call this session."
+    },
+    "forbidden_actions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Hard-blocked tools / patterns (write-tools, host shell, secret exposure)."
+    },
+    "evidence_output": { "type": "string", "description": "Filesystem path where findings.json and report.md go." }
+  },
+  "$defs": {
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start": { "type": "string", "format": "date-time" },
+        "end": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

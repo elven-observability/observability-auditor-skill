@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elven-observability.github.io/observability-auditor-skill/schemas/scored-dashboard.schema.json",
+  "title": "Scored Dashboard",
+  "description": "Output shape of scripts/score_dashboard.mjs for one dashboard.",
+  "type": "object",
+  "required": ["title", "score", "priority", "recommendation"],
+  "additionalProperties": false,
+  "properties": {
+    "uid": { "type": ["string", "null"] },
+    "title": { "type": "string", "minLength": 1 },
+    "score": { "type": "number", "minimum": 0, "maximum": 5, "multipleOf": 0.25 },
+    "priority": { "type": "string", "enum": ["critical", "high", "medium", "low", "info"] },
+    "recommendation": { "type": "string" },
+    "reasons": { "type": "array", "items": { "type": "string" } },
+    "strengths": { "type": "array", "items": { "type": "string" } },
+    "gaps": { "type": "array", "items": { "type": "string" } },
+    "primary_question": { "type": "string" }
+  }
+}

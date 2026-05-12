@@ -1,0 +1,80 @@
+{
+  "name": "@elven-observability/observability-auditor-skill",
+  "version": "1.0.0",
+  "description": "Elite, read-only MCP/Grafana observability audit skill plus CLI — org/app/incident audits, alert and dashboard scoring (0–5 rubric), SLO and burn-rate recommendations, 2026-grade evidence ledger, two-layer client reports, OTel-stable semantic conventions, exemplars, error-budget policy. Ships as portable Agent Skill (Claude / Codex / any MCP-aware agent) and a zero-dependency Node CLI.",
+  "type": "module",
+  "bin": {
+    "mcp-observability-auditor": "./bin/mcp-observability-auditor.mjs",
+    "observability-auditor": "./bin/mcp-observability-auditor.mjs"
+  },
+  "files": [
+    "bin",
+    "skill",
+    "evals",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "doctor": "node ./bin/mcp-observability-auditor.mjs doctor",
+    "test": "node --test",
+    "lint": "node --check ./bin/mcp-observability-auditor.mjs && for f in skill/mcp-observability-auditor/scripts/*.mjs skill/mcp-observability-auditor/scripts/lib/*.mjs; do node --check $f || exit 1; done",
+    "pack:dry": "npm pack --dry-run",
+    "prepublishOnly": "npm run lint && npm test && npm run doctor"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "grafana",
+    "grafana-mcp",
+    "observability",
+    "auditor",
+    "audit",
+    "prometheus",
+    "mimir",
+    "loki",
+    "tempo",
+    "pyroscope",
+    "clickhouse",
+    "elasticsearch",
+    "alerts",
+    "alerting",
+    "slo",
+    "burn-rate",
+    "error-budget",
+    "incident",
+    "incident-timeline",
+    "dashboard",
+    "opentelemetry",
+    "otel",
+    "skill",
+    "agent-skill",
+    "claude",
+    "claude-code",
+    "codex",
+    "anthropic",
+    "elven-works",
+    "elven-observability"
+  ],
+  "author": {
+    "name": "Elven Observability",
+    "email": "engineering@elven.works",
+    "url": "https://elven.works"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "homepage": "https://github.com/elven-observability/observability-auditor-skill#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elven-observability/observability-auditor-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/elven-observability/observability-auditor-skill/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}
