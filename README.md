@@ -7,9 +7,9 @@
 [![npm](https://img.shields.io/npm/v/@elven-observability/observability-auditor-skill.svg?color=cb3837&label=npm)](https://www.npmjs.com/package/@elven-observability/observability-auditor-skill)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Node ≥18](https://img.shields.io/badge/node-%E2%89%A518-brightgreen)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/tests-36%20passing-brightgreen)](./tests)
+[![Tests](https://img.shields.io/badge/tests-40%20passing-brightgreen)](./tests)
 [![Skills Spec](https://img.shields.io/badge/agentskills.io-1.0-blueviolet)](https://agentskills.io/specification)
-[![Read-only by default](https://img.shields.io/badge/read--only-by%20default-success)](./skill/mcp-observability-auditor/references/mcp-safety.md)
+[![Read-only by default](https://img.shields.io/badge/read--only-by%20default-success)](./skill/observability-auditor/references/mcp-safety.md)
 
 </div>
 
@@ -72,8 +72,8 @@ Pronto. Abra seu agente e mande "audita o checkout do cliente X" — ele já car
 
 ```bash
 npm install -g @elven-observability/observability-auditor-skill
-mcp-observability-auditor welcome     # 👋 30-second intro
-mcp-observability-auditor doctor      # ✓ check the install
+observability-auditor welcome     # 👋 30-second intro
+observability-auditor doctor      # ✓ check the install
 ```
 
 Ou sem instalar nada:
@@ -90,14 +90,14 @@ npx @elven-observability/observability-auditor-skill welcome
 
 ```bash
 # 1️⃣  Exporta os templates pra dentro do seu cliente/projeto
-mcp-observability-auditor export-templates --dest ./meu-audit
+observability-auditor export-templates --dest ./meu-audit
 
 # 2️⃣  Preenche audit-context.yaml (cliente, org_id, timezone, janelas) e valida
 cd ./meu-audit
-mcp-observability-auditor validate-context --context ./audit-context.yaml --strict
+observability-auditor validate-context --context ./audit-context.yaml --strict
 
 # 3️⃣  No agente, executa o prompt master e deixa ele dirigir o MCP
-mcp-observability-auditor prompt master \
+observability-auditor prompt master \
   --client AcmeRetail --org-id 42 \
   --grafana-url https://grafana.acme.com --timezone America/Sao_Paulo
 ```
@@ -105,7 +105,7 @@ mcp-observability-auditor prompt master \
 No final você roda:
 
 ```bash
-mcp-observability-auditor render-report \
+observability-auditor render-report \
   --findings ./findings.json --context ./audit-context.yaml \
   --out ./audit-report.md
 ```
@@ -132,10 +132,10 @@ Todos esses prompts estão em [`evals/evals.json`](./evals/evals.json) — você
 
 ```
 observability-auditor-skill/
-├── bin/                            CLI (mcp-observability-auditor / observability-auditor)
+├── bin/                            CLI (`observability-auditor`, alias `mcp-observability-auditor`)
 ├── evals/evals.json                6 prompts pt-BR realistas
-├── tests/                          36 testes node:test
-└── skill/mcp-observability-auditor/
+├── tests/                          40 testes node:test
+└── skill/observability-auditor/
     ├── SKILL.md                    router enxuto (761 chars frontmatter, CSO-compliant)
     ├── references/                 13 playbooks
     │   ├── preflight-readonly.md
@@ -177,22 +177,22 @@ observability-auditor-skill/
 <summary><b>Clique para abrir a lista completa de comandos</b></summary>
 
 ```text
-mcp-observability-auditor [--version | --help]
-mcp-observability-auditor list [--json]
-mcp-observability-auditor playbooks | prompts | templates | schemas | profiles | scripts [--json]
-mcp-observability-auditor show <id>                                # auto-resolve com hint
-mcp-observability-auditor show playbook:<id> | prompt:<id> | profile:<id>    # explícito
-mcp-observability-auditor prompt [id] [--client X] [--org-id X] [--timezone X] [--set KEY=VALUE …] [--output file]
-mcp-observability-auditor export-templates [--dest dir] [--force] [--dry-run]
-mcp-observability-auditor install-skill [--dest ~/.agents/skills] [--force] [--dry-run]
-mcp-observability-auditor window --start <ISO> --end <ISO> [--tz <IANA>] [--slice <m>] [--json]
-mcp-observability-auditor validate-context --context <file> [--strict] [--schema <file>] [--no-schema]
-mcp-observability-auditor score-alert (--alert <file> | --batch <file>|- | --inline <json>)
-mcp-observability-auditor score-dashboard (--dashboard <file> | --batch <file>|- | --inline <json>)
-mcp-observability-auditor render-report --findings <file> [--context <file>] [--template <file>] [--out <file>]
-mcp-observability-auditor render-prompt --id <prompt-id> [--set KEY=VALUE …] [--out <file>]
-mcp-observability-auditor redact [--in <file>] [--out <file>] [--hash] [--keep-emails] [--keep-ips] [--extra <file>]
-mcp-observability-auditor doctor [--strict]
+observability-auditor [--version | --help]
+observability-auditor list [--json]
+observability-auditor playbooks | prompts | templates | schemas | profiles | scripts [--json]
+observability-auditor show <id>                                # auto-resolve com hint
+observability-auditor show playbook:<id> | prompt:<id> | profile:<id>    # explícito
+observability-auditor prompt [id] [--client X] [--org-id X] [--timezone X] [--set KEY=VALUE …] [--output file]
+observability-auditor export-templates [--dest dir] [--force] [--dry-run]
+observability-auditor install-skill [--dest ~/.agents/skills] [--force] [--dry-run]
+observability-auditor window --start <ISO> --end <ISO> [--tz <IANA>] [--slice <m>] [--json]
+observability-auditor validate-context --context <file> [--strict] [--schema <file>] [--no-schema]
+observability-auditor score-alert (--alert <file> | --batch <file>|- | --inline <json>)
+observability-auditor score-dashboard (--dashboard <file> | --batch <file>|- | --inline <json>)
+observability-auditor render-report --findings <file> [--context <file>] [--template <file>] [--out <file>]
+observability-auditor render-prompt --id <prompt-id> [--set KEY=VALUE …] [--out <file>]
+observability-auditor redact [--in <file>] [--out <file>] [--hash] [--keep-emails] [--keep-ips] [--extra <file>]
+observability-auditor doctor [--strict]
 ```
 
 **Exit codes** consistentes em todos os scripts: `0` ok · `1` usage error · `2` data/validation error. Todo script responde a `--version` e `--help`.
@@ -226,7 +226,7 @@ counter_test: db p95 stayed flat → upstream caller (refutado: db saltou no mes
 next_validation: <cheapest query that would falsify this finding>
 ```
 
-Detalhes em [`references/anti-patterns.md`](./skill/mcp-observability-auditor/references/anti-patterns.md).
+Detalhes em [`references/anti-patterns.md`](./skill/observability-auditor/references/anti-patterns.md).
 
 ---
 

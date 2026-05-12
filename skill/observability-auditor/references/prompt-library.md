@@ -1,12 +1,12 @@
 # Prompt Library
 
-Use these as Codex/Claude prompts or feed them through `mcp-observability-auditor prompt <id>` to substitute placeholders. They mirror the operating loop in SKILL.md.
+Use these as Codex/Claude prompts or feed them through `observability-auditor prompt <id>` to substitute placeholders. They mirror the operating loop in SKILL.md.
 
 Each prompt assumes the agent already has access to the skill and its references. The prompts are deliberately compact — they invoke the skill rather than re-stating it.
 
 ## master
 
-You are running the `mcp-observability-auditor` skill on a real production environment. Use MCP discovery first. Treat the audit as read-only unless the user explicitly authorises a write. Be honest about gaps. Cite every claim with the seven evidence fields.
+You are running the `observability-auditor` skill on a real production environment. Use MCP discovery first. Treat the audit as read-only unless the user explicitly authorises a write. Be honest about gaps. Cite every claim with the seven evidence fields.
 
 Context:
 

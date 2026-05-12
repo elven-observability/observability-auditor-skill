@@ -1,7 +1,11 @@
 #!/usr/bin/env node
-// mcp-observability-auditor — CLI surface for the @elven-observability/observability-auditor-skill
+// observability-auditor — CLI surface for the @elven-observability/observability-auditor-skill
 // package. Exposes the skill manifest, prompt rendering, template export, and
-// passthrough to the deterministic scripts in skill/.../scripts/.
+// passthrough to the deterministic scripts in skill/observability-auditor/scripts/.
+//
+// Also installed under the legacy name `mcp-observability-auditor` for users who
+// installed v1.0/v1.1 — both commands point to this same file (alias planned for
+// removal in v2.0).
 //
 // Exit codes:
 //   0  ok
@@ -17,7 +21,8 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const skillName = "mcp-observability-auditor";
+const skillName = "observability-auditor";
+const LEGACY_SKILL_NAME = "mcp-observability-auditor";  // v1.0/v1.1 install path
 const skillDir = path.join(rootDir, "skill", skillName);
 const manifestPath = path.join(skillDir, "assets", "manifest.json");
 const skillFile = path.join(skillDir, "SKILL.md");
@@ -25,40 +30,54 @@ const pkgPath = path.join(rootDir, "package.json");
 
 const FRONTMATTER_LIMIT = 1024; // agentskills.io spec.
 
-function usage() {
-  return `MCP Observability Auditor — Elven Works observability audit skill.
+function isLegacyBinName() {
+  // True when the user invoked us via the deprecated `mcp-observability-auditor` alias.
+  const invoked = path.basename(process.argv[1] || "");
+  return invoked.startsWith("mcp-observability-auditor");
+}
 
-First time? Run:  mcp-observability-auditor welcome
+function maybeLegacyHint() {
+  if (isLegacyBinName()) {
+    const dim = process.stdout.isTTY && process.env.NO_COLOR === undefined ? "\x1b[2m" : "";
+    const rst = process.stdout.isTTY && process.env.NO_COLOR === undefined ? "\x1b[0m" : "";
+    process.stderr.write(`${dim}note: 'mcp-observability-auditor' is a deprecated alias. Use 'observability-auditor' going forward (the alias will be removed in v2.0).${rst}\n`);
+  }
+}
+
+function usage() {
+  return `Observability Auditor — Elven Works observability audit skill.
+
+First time? Run:  observability-auditor welcome
 
 Usage:
-  mcp-observability-auditor [--version | --help | welcome]
-  mcp-observability-auditor list [--json]
-  mcp-observability-auditor playbooks [--json]
-  mcp-observability-auditor prompts [--json]
-  mcp-observability-auditor templates [list|export] [--dest dir] [--force] [--dry-run]
-  mcp-observability-auditor schemas [--json]
-  mcp-observability-auditor scripts [list] [--json]
-  mcp-observability-auditor show <id>                           # playbook | template | script | schema id
-  mcp-observability-auditor show prompt:<id>                    # disambiguate when an id exists in both
-  mcp-observability-auditor show playbook:<id>
-  mcp-observability-auditor prompt [id] [--client X] [--org-id X] [--grafana-url X] [--timezone X] [--set KEY=VALUE] [--output file]
-  mcp-observability-auditor export-templates [--dest dir] [--force] [--dry-run]
-  mcp-observability-auditor install-skill [--dest ~/.agents/skills] [--force] [--dry-run]
-  mcp-observability-auditor window --start <ISO> --end <ISO> [--tz <IANA>] [--slice <m>] [--json]
-  mcp-observability-auditor validate-context --context <file> [--strict] [--schema <file>] [--no-schema]
-  mcp-observability-auditor score-alert (--alert <file> | --batch <file>|- | --inline <json>)
-  mcp-observability-auditor score-dashboard (--dashboard <file> | --batch <file>|- | --inline <json>)
-  mcp-observability-auditor render-report --findings <file> [--context <file>] [--template <file>] [--out <file>]
-  mcp-observability-auditor render-prompt --id <prompt-id> [--set KEY=VALUE ...] [--out <file>]
-  mcp-observability-auditor redact [--in <file>] [--out <file>] [--hash]
-  mcp-observability-auditor doctor [--strict]
+  observability-auditor [--version | --help | welcome]
+  observability-auditor list [--json]
+  observability-auditor playbooks [--json]
+  observability-auditor prompts [--json]
+  observability-auditor templates [list|export] [--dest dir] [--force] [--dry-run]
+  observability-auditor schemas [--json]
+  observability-auditor scripts [list] [--json]
+  observability-auditor show <id>                           # playbook | template | script | schema id
+  observability-auditor show prompt:<id>                    # disambiguate when an id exists in both
+  observability-auditor show playbook:<id>
+  observability-auditor prompt [id] [--client X] [--org-id X] [--grafana-url X] [--timezone X] [--set KEY=VALUE] [--output file]
+  observability-auditor export-templates [--dest dir] [--force] [--dry-run]
+  observability-auditor install-skill [--dest ~/.agents/skills] [--force] [--dry-run]
+  observability-auditor window --start <ISO> --end <ISO> [--tz <IANA>] [--slice <m>] [--json]
+  observability-auditor validate-context --context <file> [--strict] [--schema <file>] [--no-schema]
+  observability-auditor score-alert (--alert <file> | --batch <file>|- | --inline <json>)
+  observability-auditor score-dashboard (--dashboard <file> | --batch <file>|- | --inline <json>)
+  observability-auditor render-report --findings <file> [--context <file>] [--template <file>] [--out <file>]
+  observability-auditor render-prompt --id <prompt-id> [--set KEY=VALUE ...] [--out <file>]
+  observability-auditor redact [--in <file>] [--out <file>] [--hash]
+  observability-auditor doctor [--strict]
 
 Examples:
-  mcp-observability-auditor prompt incident-timeline --client AcmeRetail --org-id 123 --timezone America/Sao_Paulo
-  mcp-observability-auditor show playbook:app-deep-dive
-  mcp-observability-auditor show prompt:app-deep-dive
-  mcp-observability-auditor window --start 2026-05-10T14:00-03:00 --end 2026-05-10T16:30-03:00 --tz America/Sao_Paulo
-  mcp-observability-auditor install-skill --force
+  observability-auditor prompt incident-timeline --client AcmeRetail --org-id 123 --timezone America/Sao_Paulo
+  observability-auditor show playbook:app-deep-dive
+  observability-auditor show prompt:app-deep-dive
+  observability-auditor window --start 2026-05-10T14:00-03:00 --end 2026-05-10T16:30-03:00 --tz America/Sao_Paulo
+  observability-auditor install-skill --force
 `;
 }
 
@@ -235,7 +254,7 @@ function printList(manifest, json = false) {
     }
   }
 
-  process.stdout.write(`\n${dim}Tip: 'mcp-observability-auditor welcome' for the 30-second intro.${rst}\n`);
+  process.stdout.write(`\n${dim}Tip: 'observability-auditor welcome' for the 30-second intro.${rst}\n`);
 }
 
 function printSimple(items, json) {
@@ -331,7 +350,7 @@ function copyDirChecked(source, destination, { force = false, dryRun = false } =
 function commandShow(manifest, args) {
   const { positional } = parseArgs(args);
   const id = positional[0];
-  if (!id) bail("Missing id. Example: mcp-observability-auditor show query-library", 1);
+  if (!id) bail("Missing id. Example: observability-auditor show query-library", 1);
 
   const entry = findEntry(manifest, id);
   if (!entry) bail(`Unknown id: ${id}`, 1);
@@ -382,6 +401,22 @@ function commandInstallSkill(args) {
   const { options } = parseArgs(args);
   const base = path.resolve(expandHome(options.dest || "~/.agents/skills"));
   const destination = path.basename(base) === skillName ? base : path.join(base, skillName);
+
+  // Warn if v1.0/v1.1 left a `mcp-observability-auditor` directory next to the
+  // new install — the agent would see two skills with overlapping triggers.
+  const legacyDir = path.basename(base) === skillName
+    ? path.join(path.dirname(base), LEGACY_SKILL_NAME)
+    : path.join(base, LEGACY_SKILL_NAME);
+  if (fs.existsSync(legacyDir)) {
+    const dim = process.stdout.isTTY && process.env.NO_COLOR === undefined ? "\x1b[2m" : "";
+    const yel = process.stdout.isTTY && process.env.NO_COLOR === undefined ? "\x1b[33m" : "";
+    const rst = process.stdout.isTTY && process.env.NO_COLOR === undefined ? "\x1b[0m" : "";
+    process.stderr.write(`${yel}⚠  Found a legacy install at ${legacyDir}${rst}\n`);
+    process.stderr.write(`${dim}   This was the v1.0/v1.1 folder name. The new install will live at ${destination}.\n`);
+    process.stderr.write(`   Remove the legacy folder so your agent doesn't load two skills:\n`);
+    process.stderr.write(`     rm -rf "${legacyDir}"${rst}\n\n`);
+  }
+
   copyDirChecked(skillDir, destination, { force: Boolean(options.force), dryRun: Boolean(options.dryRun) });
   if (!options.dryRun) process.stdout.write(`Installed skill to ${destination}\n`);
 }
@@ -510,9 +545,9 @@ function commandDoctor(manifest, args) {
     `${(manifest.schemas || []).length} schemas, ${(manifest.profiles || []).length} profiles, ` +
     `${(manifest.scripts || []).length} scripts.\n` +
     `\n${dim}Next:${rst}\n` +
-    `  ${cyan}mcp-observability-auditor welcome${rst}              ${dim}# 30-second intro${rst}\n` +
-    `  ${cyan}mcp-observability-auditor list${rst}                 ${dim}# see what's inside${rst}\n` +
-    `  ${cyan}mcp-observability-auditor install-skill --dest ~/.claude/skills${rst}\n` +
+    `  ${cyan}observability-auditor welcome${rst}              ${dim}# 30-second intro${rst}\n` +
+    `  ${cyan}observability-auditor list${rst}                 ${dim}# see what's inside${rst}\n` +
+    `  ${cyan}observability-auditor install-skill --dest ~/.claude/skills${rst}\n` +
     `                                                  ${dim}# enable the agent skill${rst}\n`
   );
 }
@@ -548,7 +583,7 @@ function commandWelcome() {
     `${bold}1) 🤖  Talk to your agent (recommended)${rst}`,
     `   This package is also an Agent Skill for Claude Code / Codex / any MCP-aware agent.`,
     `   Install it once:`,
-    `     ${cyan}mcp-observability-auditor install-skill --dest ~/.claude/skills${rst}`,
+    `     ${cyan}observability-auditor install-skill --dest ~/.claude/skills${rst}`,
     `   (For Codex/Agent SDK use ${cyan}~/.agents/skills${rst} instead.)`,
     ``,
     `   Then in your agent just ask, in your own words, things like:`,
@@ -559,18 +594,18 @@ function commandWelcome() {
     `${bold}2) 🛠  Use the CLI directly${rst}`,
     `   Useful for batch jobs, CI, or when you want to score 50 alerts without burning tokens.`,
     ``,
-    `   ${cyan}mcp-observability-auditor doctor${rst}              ${dim}# check the install${rst}`,
-    `   ${cyan}mcp-observability-auditor list${rst}                ${dim}# see what's inside${rst}`,
-    `   ${cyan}mcp-observability-auditor export-templates --dest ./my-audit${rst}`,
+    `   ${cyan}observability-auditor doctor${rst}              ${dim}# check the install${rst}`,
+    `   ${cyan}observability-auditor list${rst}                ${dim}# see what's inside${rst}`,
+    `   ${cyan}observability-auditor export-templates --dest ./my-audit${rst}`,
     `                                                  ${dim}# bootstrap an audit workspace${rst}`,
-    `   ${cyan}mcp-observability-auditor score-alert --alert ./rule.json${rst}`,
+    `   ${cyan}observability-auditor score-alert --alert ./rule.json${rst}`,
     `                                                  ${dim}# score one rule with a 0–5 rubric${rst}`,
-    `   ${cyan}mcp-observability-auditor render-report --findings ./findings.json \\${rst}`,
+    `   ${cyan}observability-auditor render-report --findings ./findings.json \\${rst}`,
     `       ${cyan}--context ./audit-context.yaml --out ./report.md${rst}`,
     `                                                  ${dim}# build the client-facing markdown${rst}`,
     ``,
     `${bold}Need a worked example?${rst} See ${cyan}examples/${rst} inside the package for a fully-filled audit.`,
-    `${bold}Want to see the skill content?${rst} Try ${cyan}mcp-observability-auditor show playbook:alert-threshold-audit${rst}.`,
+    `${bold}Want to see the skill content?${rst} Try ${cyan}observability-auditor show playbook:alert-threshold-audit${rst}.`,
     `${bold}Docs and source:${rst} https://github.com/elven-observability/observability-auditor-skill`,
     ""
   ];

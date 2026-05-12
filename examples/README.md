@@ -15,13 +15,13 @@ A worked, end-to-end audit you can read or replay. Numbers and names are illustr
 
 ```bash
 # 1. Score the two example alerts (human-friendly output by default)
-mcp-observability-auditor score-alert --batch ./alerts.json
+observability-auditor score-alert --batch ./alerts.json
 
 # 2. Or as JSON for CI / jq pipelines
-mcp-observability-auditor score-alert --batch ./alerts.json --json | jq '.[] | {title, score, priority}'
+observability-auditor score-alert --batch ./alerts.json --json | jq '.[] | {title, score, priority}'
 
 # 3. Render the final markdown report
-mcp-observability-auditor render-report \
+observability-auditor render-report \
   --findings ./findings.json \
   --context ./audit-context.yaml \
   --out ./audit-report.regenerated.md
@@ -38,10 +38,10 @@ cp -r examples/ ~/audits/acme-2026-05-12
 
 cd ~/audits/acme-2026-05-12
 $EDITOR audit-context.yaml         # change client/org/timezone/windows
-mcp-observability-auditor validate-context --context ./audit-context.yaml --strict
+observability-auditor validate-context --context ./audit-context.yaml --strict
 
 # Now open Claude and ask it to drive the MCP audit using this context.
 # When it produces a findings.json, render the final report:
-mcp-observability-auditor render-report \
+observability-auditor render-report \
   --findings ./findings.json --context ./audit-context.yaml --out ./audit-report.md
 ```

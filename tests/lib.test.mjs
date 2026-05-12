@@ -8,7 +8,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const libDir = path.join(rootDir, "skill", "mcp-observability-auditor", "scripts", "lib");
+const libDir = path.join(rootDir, "skill", "observability-auditor", "scripts", "lib");
 
 const { loadYamlSubset, parseScalar } = await import(path.join(libDir, "yaml_subset.mjs"));
 const { validate } = await import(path.join(libDir, "schema_check.mjs"));

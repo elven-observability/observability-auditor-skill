@@ -1,7 +1,7 @@
 interface:
-  display_name: "MCP Observability Auditor"
+  display_name: "Observability Auditor"
   short_description: "Audit Grafana orgs, alerts, dashboards, apps"
-  default_prompt: "Use $mcp-observability-auditor to audit this observability stack through MCP and Grafana."
+  default_prompt: "Use $observability-auditor to audit this observability stack through MCP and Grafana."
 dependencies:
   tools:
     - type: "mcp"

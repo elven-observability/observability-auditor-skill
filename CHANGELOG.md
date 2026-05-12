@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] — 2026-05-12
+
+Cleanup release: the package now uses a single coherent name across the agent skill, the CLI, and the filesystem.
+
+### Changed (rename)
+- **Canonical CLI command** is now `observability-auditor` (was `mcp-observability-auditor`).
+- **Skill folder** under `~/.claude/skills/` / `~/.agents/skills/` is now `observability-auditor` (was `mcp-observability-auditor`). The `install-skill` command detects a stale legacy folder and prints a removal hint.
+- **SKILL.md frontmatter `name`** is now `observability-auditor`.
+- **Manifest `name`** + **agents/openai.yaml display name** updated to match.
+- The "mcp-" prefix served no purpose at the user layer; the package is, and always was, about observability auditing. MCP is just one of the transports it uses.
+
+### Compatibility
+- **`mcp-observability-auditor` is preserved as a deprecated alias** for both the CLI command and the filesystem skill folder. Running it prints a one-line deprecation hint on stderr; everything still works. The alias will be **removed in v2.0**.
+- The npm package name (`@elven-observability/observability-auditor-skill`) is unchanged — installation instructions keep working.
+
+### Migration (for anyone who installed v1.0 / v1.1)
+```bash
+# 1. Upgrade
+npm install -g @elven-observability/observability-auditor-skill@latest
+
+# 2. Re-install the agent skill (creates the new folder)
+observability-auditor install-skill --dest ~/.claude/skills
+
+# 3. Remove the old folder (the install-skill output reminds you of the exact path)
+rm -rf ~/.claude/skills/mcp-observability-auditor
+```
+
+### Internal
+- `bin/mcp-observability-auditor.mjs` renamed to `bin/observability-auditor.mjs` (git mv preserves history). The `bin` field in `package.json` maps both names to the same file.
+- Tests updated to reference the new paths and binary name. `tests/cli.test.mjs` keeps the same 40 cases; `tests/lib.test.mjs` reads from the renamed folder.
+- All references in README, CONTRIBUTING, examples, prompt-library, and profile docs swept to the new name. CHANGELOG entries for v1.0/v1.1 preserve the historical name for accuracy.
+
 ## [1.1.0] — 2026-05-12
 
 Polish release focused on first-impression — what your colleagues see the first time they run the CLI or browse the source.

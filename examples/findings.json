@@ -1,5 +1,5 @@
 {
-  "$schema": "../skill/mcp-observability-auditor/assets/schemas/findings.schema.json",
+  "$schema": "../skill/observability-auditor/assets/schemas/findings.schema.json",
   "audit_id": "audit-acme-checkout-2026-05-10",
   "client": "AcmeRetail",
   "org_id": 42,

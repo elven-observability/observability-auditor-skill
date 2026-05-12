@@ -18,13 +18,13 @@ Node ≥18 required. Zero runtime dependencies is a design goal — please don't
 
 | Change | File / location |
 |---|---|
-| New playbook | `skill/mcp-observability-auditor/references/<name>.md` + entry in `assets/manifest.json` + router row in `SKILL.md` |
-| New deterministic helper | `skill/mcp-observability-auditor/scripts/<name>.mjs` + entry in `assets/manifest.json` |
-| Shared lib | `skill/mcp-observability-auditor/scripts/lib/<name>.mjs` (no deps; covered by `tests/lib.test.mjs`) |
-| New CLI subcommand | `bin/mcp-observability-auditor.mjs` — keep exit codes consistent (`0` / `1` / `2`) |
-| New JSON Schema | `skill/mcp-observability-auditor/assets/schemas/<name>.schema.json` |
-| Template | `skill/mcp-observability-auditor/assets/templates/<name>.<ext>` |
-| Profile (org-specific defaults) | `skill/mcp-observability-auditor/assets/profiles/<org>.yaml` |
+| New playbook | `skill/observability-auditor/references/<name>.md` + entry in `assets/manifest.json` + router row in `SKILL.md` |
+| New deterministic helper | `skill/observability-auditor/scripts/<name>.mjs` + entry in `assets/manifest.json` |
+| Shared lib | `skill/observability-auditor/scripts/lib/<name>.mjs` (no deps; covered by `tests/lib.test.mjs`) |
+| New CLI subcommand | `bin/observability-auditor.mjs` — keep exit codes consistent (`0` / `1` / `2`) |
+| New JSON Schema | `skill/observability-auditor/assets/schemas/<name>.schema.json` |
+| Template | `skill/observability-auditor/assets/templates/<name>.<ext>` |
+| Profile (org-specific defaults) | `skill/observability-auditor/assets/profiles/<org>.yaml` |
 
 ## Hard rules for changes
 
@@ -39,7 +39,7 @@ Node ≥18 required. Zero runtime dependencies is a design goal — please don't
 Tests live in `tests/`:
 
 - `tests/lib.test.mjs` — unit tests for `scripts/lib/yaml_subset.mjs` and `scripts/lib/schema_check.mjs`.
-- `tests/cli.test.mjs` — end-to-end CLI tests, also covers each script via `mcp-observability-auditor <script-subcommand>`.
+- `tests/cli.test.mjs` — end-to-end CLI tests, also covers each script via `observability-auditor <script-subcommand>`.
 
 Run `npm test`. Add at least one test per new behaviour, plus a `doctor` check if the new behaviour adds files to the skill tree.
 

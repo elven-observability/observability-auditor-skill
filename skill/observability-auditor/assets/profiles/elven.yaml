@@ -5,7 +5,7 @@
 # Usage:
 #   1. Copy values from here into your audit-context.yaml.
 #   2. Validate with:
-#        mcp-observability-auditor validate-context --context audit-context.yaml --strict
+#        observability-auditor validate-context --context audit-context.yaml --strict
 #   3. The skill itself does not auto-load profiles — keeping the agent context
 #      lean is more important than the convenience of an implicit profile.
 

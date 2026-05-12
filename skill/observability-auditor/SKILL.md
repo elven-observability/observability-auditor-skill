@@ -1,11 +1,11 @@
 ---
-name: mcp-observability-auditor
+name: observability-auditor
 description: Use when the user asks to investigate, audit, review, score, validate, debug, or report on an observability stack reached through MCP (Grafana, Mimir/Prometheus, Loki, Tempo, Pyroscope, ClickHouse, Elasticsearch, Beyla, Sift, Grafana Incident/OnCall) — including incident timelines, "what broke yesterday", "why did X drop", SLO/burn-rate design, alert rule audits, dashboard quality reviews, label-drift discovery, blind-spot mapping, and two-layer client reports. Triggers also include "compare today to last Tuesday", "audit alerts for client X", "find slow requests for service Y", "find error patterns for tenant Z", and any request for an evidence-cited observability conclusion.
 license: MIT
-version: 1.0.0
+version: 1.2.0
 ---
 
-# MCP Observability Auditor
+# Observability Auditor
 
 A read-only, evidence-first auditor for Grafana-shaped observability stacks reached through MCP. Optimised for production incidents, regulated environments, and client-facing reports where uncertainty is the rule and theatre is unacceptable.
 

@@ -1,5 +1,5 @@
 {
-  "skill_name": "mcp-observability-auditor",
+  "skill_name": "observability-auditor",
   "notes": "Realistic prompts an Elven Observability customer would actually send. Each prompt is testable against a real Grafana MCP server. Run claude/codex with the skill loaded; grade qualitatively first, then add assertions.",
   "evals": [
     {

@@ -7,8 +7,8 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const cli = path.join(rootDir, "bin", "mcp-observability-auditor.mjs");
-const skillDir = path.join(rootDir, "skill", "mcp-observability-auditor");
+const cli = path.join(rootDir, "bin", "observability-auditor.mjs");
+const skillDir = path.join(rootDir, "skill", "observability-auditor");
 
 function run(args, options = {}) {
   return spawnSync(process.execPath, [cli, ...args], {
@@ -384,8 +384,8 @@ test("install-skill copies the skill tree to a temp dest", () => {
   const dest = tempPath("install-target");
   const result = run(["install-skill", "--dest", dest]);
   assert.equal(result.status, 0, result.stderr || result.stdout);
-  assert.ok(fs.existsSync(path.join(dest, "mcp-observability-auditor", "SKILL.md")));
-  assert.ok(fs.existsSync(path.join(dest, "mcp-observability-auditor", "assets", "schemas", "audit-context.schema.json")));
+  assert.ok(fs.existsSync(path.join(dest, "observability-auditor", "SKILL.md")));
+  assert.ok(fs.existsSync(path.join(dest, "observability-auditor", "assets", "schemas", "audit-context.schema.json")));
   fs.rmSync(dest, { recursive: true, force: true });
 });
 

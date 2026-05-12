@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // render_prompt.mjs — substitute [PLACEHOLDERS] in any prompt from the library.
-// Mirrors the substitution semantics of bin/mcp-observability-auditor.mjs prompt,
+// Mirrors the substitution semantics of bin/observability-auditor.mjs prompt,
 // but standalone so the skill can be used outside the npm package.
 //
 // Exit codes:

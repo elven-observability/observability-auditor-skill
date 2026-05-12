@@ -1,6 +1,6 @@
 {
-  "name": "mcp-observability-auditor",
-  "version": "1.0.0",
+  "name": "observability-auditor",
+  "version": "1.2.0",
   "playbooks": [
     {
       "id": "preflight-readonly",
